@@ -13,7 +13,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_STACK_SIZE 10 // 스택 최대 사이즈
+#define MAX_STACK_SIZE 1 // 스택 최대 사이즈 ( result값만 들어감 )
 
 // 스택 구조체 선언
 typedef int element;
