@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
 	printf("0 "); // 피보나치 첫번째항 0을 미리 출력
 	push(&s, temp1); // 스택에 temp1(=1) 넣음 ( 다음 반복문에서 pop할때 스택이 비어있으면 안되기 때문 )
 
-	for(int i=0; i<num; i++){ // num 번쨰 항만큼 반복
+	for(int i=0; i<num; i++){ // num 번째 항만큼 반복
 		temp1 = pop(&s); // 스택에서 중간값(=fib(n-1))을 가져옴
 		printf("%d ", temp1);
 
