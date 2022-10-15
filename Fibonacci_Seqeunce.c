@@ -12,23 +12,77 @@
 
 
 #include <stdio.h>
+#include <stdlib.h>
+#define MAX_STACK_SIZE 10 // 스택 최대 사이즈
 
-// 피보나치 함수 프로토타입 선언
-int fib(int n);
+// 스택 구조체 선언
+typedef int element;
+typedef struct{
+	element data[MAX_STACK_SIZE];
+	int top;
+} StackType;
 
-int main(){
+// 함수 프로토타입 선언
+void init_stack(StackType *s);
+int is_empty(StackType *s);
+int is_full(StackType *s);
+void push(StackType *s, int item);
+element pop(StackType *s);
+
+
+// 메인 함수
+int main(int argc, char* argv[]){
+	StackType s;
 	int num;
+	int temp1=1, temp2=0, result=0;
 
-	printf("input = ");
-	scanf("%d", &num); // 반복문을 실행하기 위해 입력값 num을 받는다
+	printf("input a number ---> ");
+	scanf("%d", &num); // 피보나치 수를 몇번째 항까지 구할건지 입력받음
 
-	for(int i=0; i<=num; i++){ // num 만큼 반복
-		printf("%d ", fib(i)); // 0~num 까지 피보나치 함수에 대입
+	init_stack(&s); // 스택 초기화
+	printf("0 "); // 피보나치 첫번째항 0을 미리 출력
+	push(&s, temp1); // 스택에 temp1(=1) 넣음 ( 다음 반복문에서 pop할때 스택이 비어있으면 안되기 때문 )
+
+	for(int i=0; i<num; i++){ // num 번쨰 항만큼 반복
+		temp1 = pop(&s); // 스택에서 중간값(=fib(n-1))을 가져옴
+		printf("%d ", temp1);
+
+		result = temp1 + temp2; // (=(fib(n-1) + fib(n-2))) 와 같음
+		push(&s, result); // 그 값을 스택에 넣음
+		temp2 = temp1; // 끝값(=fib(n-2))에 중간값 대입 
 	}
+
 }
 
-int fib(int n){
-	if(n==0) return 0; // n이 0이면 0을 반환하여 출력
-	if(n==1) return 1; // n이 1이면 1을 반환하여 출력
-	return fib(n-1) + fib(n-2); // n부터 스택에 쌓이고 이어 n-1, n-2도 스택에 계속해서 쌓임
+
+
+void init_stack(StackType *s){ 
+	(s->top) = -1; // -1 : 스택이 비어있다는 의미
 }
+
+int is_empty(StackType *s){ // top이 비어있으면 True
+	return ((s->top) == -1);
+}
+
+int is_full(StackType *s){ // top이 꽉 찼으면 True
+	return ((s->top)==MAX_STACK_SIZE-1);
+}
+
+void push(StackType *s, int item){
+	if(is_full(s)){ // 스택이 가득찼으면 비정상 강제 종료
+		printf("스택 가득참!\n");
+		exit(1);
+	}
+	s->data[++(s->top)] = item;
+}
+
+element pop(StackType *s){
+	if(is_empty(s)){ // 스택이 비어있으면 비정상 강제 종료
+		printf("스택이 비어있음!");
+		exit(1);
+	}
+	return (s->data[(s->top)--]);
+}
+
+
+
