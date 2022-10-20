@@ -18,35 +18,23 @@ element dequeue(QueueType *q);
 element peek(QueueType *q);
 void error(char *message);
 void queue_print(QueueType *q);
-int get_count(QueueType *q);
+void get_count(QueueType *q);
 
 int main(){
 	QueueType q;
 	init_queue(&q);
 
-	enqueue(&q, 1);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
+	for(int i=0; i<3; i++){
+		enqueue(&q, i);
+		queue_print(&q);
+		get_count(&q);
+	}
 
-	enqueue(&q, 2);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
-
-	enqueue(&q, 3);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
-
-	dequeue(&q);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
-
-	dequeue(&q);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
-
-	dequeue(&q);
-	queue_print(&q);
-	printf("큐 요소 개수 : %d\n", get_count(&q));
+	for(int i=0; i<3; i++){
+		dequeue(&q);
+		queue_print(&q);
+		get_count(&q);
+	}
 }
 
 
@@ -97,7 +85,7 @@ void queue_print(QueueType *q){
 	printf("\n");
 }
 
-int get_count(QueueType *q){
-	return (q->rear - q->front);
+void get_count(QueueType *q){
+	printf("큐 요소의 개수 : %d\n", (q->rear - q->front));
 }
 
