@@ -148,8 +148,8 @@ void postfix_notation(char ch[]){
 			push(&s, tmp1);
 		}
 		else{ // 연산자이면
-			tmp3 = pop(&s);
 			tmp2 = pop(&s);
+			tmp3 = pop(&s);
 
 			switch(ch[i]){
 			case '+': push(&s, tmp2+tmp3); break;
