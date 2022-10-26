@@ -21,7 +21,6 @@ typedef struct{
 	int id;
 	int arrival_time;
 	int service_time;
-	int togle; // 일반고객 0, VIP고객 1
 } element;
 
 // 원형큐 타입 고객 배열 구조체 생성
@@ -41,83 +40,80 @@ element dequeue(QueueType *q);
 int main(){
 	int minutes=50000; // 50,000분 동안 시뮬레이션을 돌림
 	int service_time=0, service_customer, service_togle; // 현재 서비스중인 고객의 정보
-	int vip_count=0, vip_wait=0; // vip 고객 수, 대기시간
-	int general_count=0, general_wait=0; // 일반 고객 수, 대기시간
+	int vip_count=0, vip_wait=0, vip_service_time=0; // vip 고객 수, 대기시간, 서비스시간
+	int general_count=0, general_wait=0, gen_service_time=0; // 일반 고객 수, 대기시간, 서비스시간
 	int total_count=0, total_wait=0; // 전체 고객 수, 대기시간
 	int random=0;
-	QueueType queue; // 원형큐 타입의 구조체 객체 생성
+	QueueType queue_vip; // 원형큐 타입의 구조체 객체 생성
+	QueueType queue_gen;
 
-	init_queue(&queue); // 큐 초기화
+	init_queue(&queue_vip); // 큐 초기화
+	init_queue(&queue_gen);
 	srand(time(NULL)); // 난수 초기화
 	
 	for(int clock=0; clock<minutes; clock++){ // 50,000번 반복
 		printf("현재시각 = %d\n", clock);
 		
 		random = rand()%10; // 0~9까지 중 난수 하나 저장
-		if(random < 3){ // VIP고객=0, 일반고객=1,2 라고 가정
-			element customer;
-
-			if(random==0){ // 10% 확률로 VIP 고객 발생
-				customer.togle = 1; // vip 전용 토글
-				vip_count++; // vip 고객 수 증가
-			}
-			else{
-				customer.togle = 0; // 일반 전용 토글
-				general_count++; // 일반 고객 수 증가
-			}
-				
-			customer.id = total_count++;
-			customer.arrival_time = clock; // 현재 시간을 도착 시간으로 저장
-			customer.service_time = rand()%3+1; // 1~3분 중 랜덤 고객 업무 소요 시간
-	
-			enqueue(&queue, customer); // 고객을 대기열에 넣음
-	
-			if(customer.togle == 1) printf("VIP");
-			else printf("일반");
-			printf(" 고객%d이 %d 분에 들어옵니다. 업무 처리 시간 = %d 분\n", customer.id, customer.arrival_time, customer.service_time);
+		if(random < 2){ // 일반 고객 등장
+			element gen;
+			gen.id = general_count++;
+			total_count++;
+			gen.arrival_time = clock; // 현재 시간을 도착 시간으로 저장
+			gen.service_time = rand()%3+1; // 1~3분 중 랜덤 고객 업무 소요 시간
+			enqueue(&queue_gen, gen); // 고객을 대기열에 넣음
+			printf("일반 고객%d이 %d 분에 들어옵니다. 업무 처리 시간 = %d 분\n", gen.id, gen.arrival_time, gen.service_time);
+		}
+		else if(random == 2){ // vip 고객 등장
+			element vip;
+			vip.id = vip_count++;
+			total_count++;
+			vip.arrival_time = clock; // 현재 시간을 도착 시간으로 저장
+			vip.service_time = rand()%3+1; // 1~3분 중 랜덤 고객 업무 소요 시간
+			enqueue(&queue_vip, vip); // 고객을 대기열에 넣음
+			printf("vIP 고객%d이 %d 분에 들어옵니다. 업무 처리 시간 = %d 분\n", vip.id, vip.arrival_time, vip.service_time);
 		}
 
-		if(service_time > 0){ // 현재 누군가가 업무처리중임
-			if(service_togle == 1) printf("VIP");
-			else printf("일반");
-	
-			printf(" 고객%d 업무처리중입니다.\n", service_customer);
-			service_time--;
+		if(vip_service_time > 0){ // 현재 VIP 업무처리중임
+			printf("일반 고객%d 업무처리중입니다.\n", service_customer);
+			vip_service_time--;
 		}
-		else{
-			if(!is_empty(&queue)){ // 대기열에 고객이 있으면 대기번호가 가장 빠른 고객을 하나 꺼냄
-				element customer = dequeue(&queue); // 그 고객의 정보를 저장
+		else if(gen_service_time>0 && is_empty(&queue_vip)){ // 현재 일반 업무처리중임
+			printf("VIP 고객%d 업무처리중입니다.\n", service_customer);
+			gen_service_time--;
+		}
+		else{ // 아무도 없음
+			if(!is_empty(&queue_gen) && is_empty(&queue_vip)){ // 일반 고객 꺼냄
+				element customer = dequeue(&queue_gen); // 그 고객의 정보를 저장
 				service_customer = customer.id;
-				service_togle = customer.togle; // 고객이 vip인지 일반 고객인지 확인
-				service_time = customer.service_time;
+				gen_service_time = customer.service_time;
 				
-				if(service_togle==1){ // vip 고객일 경우, vip 대기시간 증가
-					vip_wait += clock-customer.arrival_time;
-					printf("VIP");
-				}
-				else{ // 일반 고객일 경우, 일반 대기시간 증가
-					general_wait += clock-customer.arrival_time;
-					printf("일반");
-				}	
-
-				printf("고객%d이 %d 분에 업무 시작, 대기시간은 %d 분\n", customer.id, clock, clock-customer.arrival_time);
+				general_wait += clock-customer.arrival_time;
+				printf("일반 고객%d이 %d 분에 업무 시작, 대기시간은 %d 분\n", customer.id, clock, clock-customer.arrival_time);
 			}
+			else if(!is_empty(&queue_vip)){ // VIP 고객 꺼냄
+				element customer = dequeue(&queue_vip); // 그 고객의 정보를 저장
+				service_customer = customer.id;
+				vip_service_time = customer.service_time;
+				
+				vip_wait += clock-customer.arrival_time;
+				printf("VIP 고객%d이 %d 분에 업무 시작, 대기시간은 %d 분\n", customer.id, clock, clock-customer.arrival_time);
+			}
+
 		}
-		total_wait = vip_wait + general_wait; // 전체 대기 시간
 	}
+	total_wait = vip_wait + general_wait; // 전체 대기 시간
 
 	printf("\n\n==================================================================\n\n");
+	
 	printf("일반고객 || 전체대기시간=%d분 || 방문수=%d명 || 평균대기시간=", general_wait, general_count);
-	if(general_count>0)	printf("%d분\n\n", general_wait/general_count);
-	else printf("0분\n\n"); // 분모가 0일 경우, 즉 일반 고객이 없었을 경우
+	printf("%.1f분\n\n", (float)general_wait/general_count);
 
 	printf("VIP고객  || 전체대기시간=%d분 || 방문수=%d명 || 평균대기시간=", vip_wait, vip_count);
-	if(vip_count>0) printf("%d분\n\n", vip_wait/vip_count);
-	else printf("0분\n\n"); // 위와 동일
+	printf("%.1f분\n\n", (float)vip_wait/vip_count);
 
 	printf("전체고객 || 전체대기시간=%d분 || 방문수=%d명 || 평균대기시간=", total_wait, total_count);
-	if(total_count>0) printf("%d분\n\n", total_wait/total_count);
-	else printf("0분\n\n"); // 위와 동일
+	printf("%.1f분\n\n", (float)total_wait/total_count);
 	
 	printf("==================================================================\n\n");
 	return 0;
