@@ -40,10 +40,11 @@ element dequeue(QueueType *q);
 int main(){
 	int minutes=50000; // 50,000분 동안 시뮬레이션을 돌림
 	int service_time=0, service_customer, service_togle; // 현재 서비스중인 고객의 정보
-	int vip_count=0, vip_wait=0, vip_service_time=0; // vip 고객 수, 대기시간, 서비스시간
-	int general_count=0, general_wait=0, gen_service_time=0; // 일반 고객 수, 대기시간, 서비스시간
+	int vip_count=0, vip_wait=0; // vip 고객 수, 대기시간
+	int general_count=0, general_wait=0; // 일반 고객 수, 대기시간
 	int total_count=0, total_wait=0; // 전체 고객 수, 대기시간
 	int random=0;
+	int separator=0; // vip, 일반 구분용도
 	QueueType queue_vip; // 원형큐 타입의 구조체 객체 생성
 	QueueType queue_gen;
 
@@ -74,28 +75,30 @@ int main(){
 			printf("vIP 고객%d이 %d 분에 들어옵니다. 업무 처리 시간 = %d 분\n", vip.id, vip.arrival_time, vip.service_time);
 		}
 
-		if(vip_service_time > 0){ // 현재 VIP 업무처리중임
-			printf("일반 고객%d 업무처리중입니다.\n", service_customer);
-			vip_service_time--;
-		}
-		else if(gen_service_time>0 && is_empty(&queue_vip)){ // 현재 일반 업무처리중임
+		if(service_time > 0 && separator==2){ // 현재 VIP 업무처리중임
 			printf("VIP 고객%d 업무처리중입니다.\n", service_customer);
-			gen_service_time--;
+			service_time--;
+		}
+		else if(service_time>0 && separator==1){ // 현재 일반 업무처리중임
+			printf("일반 고객%d 업무처리중입니다.\n", service_customer);
+			service_time--;
 		}
 		else{ // 아무도 없음
 			if(!is_empty(&queue_gen) && is_empty(&queue_vip)){ // 일반 고객 꺼냄
 				element customer = dequeue(&queue_gen); // 그 고객의 정보를 저장
 				service_customer = customer.id;
-				gen_service_time = customer.service_time;
-				
+				service_time = customer.service_time;
+				separator = 1;
+
 				general_wait += clock-customer.arrival_time;
 				printf("일반 고객%d이 %d 분에 업무 시작, 대기시간은 %d 분\n", customer.id, clock, clock-customer.arrival_time);
 			}
 			else if(!is_empty(&queue_vip)){ // VIP 고객 꺼냄
 				element customer = dequeue(&queue_vip); // 그 고객의 정보를 저장
 				service_customer = customer.id;
-				vip_service_time = customer.service_time;
-				
+				service_time = customer.service_time;
+				separator = 2;
+
 				vip_wait += clock-customer.arrival_time;
 				printf("VIP 고객%d이 %d 분에 업무 시작, 대기시간은 %d 분\n", customer.id, clock, clock-customer.arrival_time);
 			}
