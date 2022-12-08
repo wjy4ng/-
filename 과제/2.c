@@ -11,32 +11,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #define MAX_ArraySize 100
 
-// 원형 연결 리스트 구조체
+// Define Singly Linked List
 typedef int element;
 typedef struct ListNode{
 	element data;
 	struct ListNode *link;
 } ListNode;
 
-// 노드 ADT 구현
-ListNode* insert_first(ListNode *head, element value){
-	ListNode *p = (ListNode *)malloc(sizeof(ListNode));
-	p->data = value;
-
-	if(head == NULL){
-		head = p;
-		p->link = head;
-	}
-	else{
-		p->link = head->link;
-		head->link = p;
-	}
-	return head;
-}
-
+// Define Abstract Data Type
 ListNode* insert_last(ListNode* head, element value){
 	ListNode *p = (ListNode *)malloc(sizeof(ListNode));
 	p->data = value;
@@ -65,7 +49,7 @@ void print_list(ListNode *head){
 	printf("%d->\n", p->data); // 헤드 포인터 출력
 }
 
-// 탐색 함수
+// Define search()
 ListNode* search(ListNode *head, element value){
 	ListNode *p;
 
@@ -78,7 +62,7 @@ ListNode* search(ListNode *head, element value){
 	return 0;
 }
 
-// 메인 함수
+// main
 int main(){
 	ListNode *head = NULL;
 	int size=0, arr[MAX_ArraySize], value=0;
